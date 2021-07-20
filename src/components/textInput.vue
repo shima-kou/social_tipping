@@ -20,7 +20,10 @@ export default {
 .input-form-wrap {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  & + .input-form-wrap {
+    margin-top: 15px;
+  }
   .input-title,
   .text-input {
     display: inline-block;
@@ -32,11 +35,13 @@ export default {
     margin-right: 8px;
     min-width: 110px;
     text-align: left;
+    padding: 0;
   }
 
   input {
     border: 1px solid #777;
     display: inline-block;
+    width: calc(100% - 110px);
   }
 }
 </style>
