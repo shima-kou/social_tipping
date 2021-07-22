@@ -1,9 +1,9 @@
 <template>
   <div class="login">
-    <p v-show="user">{{ user.name }}様は現在ログインしています。</p>
-    <router-link to="/">
-      <button @click="logout">ログアウト</button>
-    </router-link>
+    <div class="mydata-wrap">
+      <p class="userName">{{ user.name }}さんようこそ！</p>
+      <p class="wallet">残高: {{ user.wallet }}円</p>
+    </div>
   </div>
 </template>
 
@@ -32,3 +32,12 @@ export default {
   },
 };
 </script>
+
+<style scoped lang="scss">
+.mydata-wrap {
+  display: flex;
+  > p {
+    width: 50%;
+  }
+}
+</style>

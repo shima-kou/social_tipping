@@ -1,9 +1,9 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import firebase from 'firebase';
 import Login from '../views/Login.vue';
 import Signup from '../views/Signup.vue';
-import Mypage from '../views/Mypage.vue';
+import Dashboard from '../views/Dashboard.vue';
+import firebase from '../firebase';
 
 Vue.use(VueRouter);
 
@@ -20,9 +20,9 @@ const routes = [
     component: Signup,
   },
   {
-    path: `/mypage`,
-    name: 'Mypage',
-    component: Mypage,
+    path: `/dashboard`,
+    name: 'Dashboard',
+    component: Dashboard,
     meta: { requiresAuth: true },
   },
 ];
