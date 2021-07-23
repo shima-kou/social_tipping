@@ -1,16 +1,18 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import router from '../router';
-import firebase from 'firebase/app';
+import firebase from '../firebase';
+
+const db = firebase.firestore();
 
 Vue.use(Vuex);
 
 const store = new Vuex.Store({
   state: {
     user: {
-      uid: '',
-      email: '',
       name: '',
+      wallet: '',
+      uid: '',
     },
     errorMessage: '',
   },
@@ -30,19 +32,19 @@ const store = new Vuex.Store({
       // userプロパティを使用
       firebase.auth().onAuthStateChanged((user) => {
         if (user) {
-          commit('getUser', { uid: user.uid, email: user.email, name: user.displayName });
+          const userData = db.collection('users').doc(user.uid);
+          userData.get().then((doc) => {
+            console.log(doc.data());
+            commit('getUser', doc.data());
+          });
         }
       });
     },
-    checkErrorMessage({ commit }, { error, method }) {
+    checkErrorMessage({ commit }, error) {
       let errorMessage = '';
       switch (error.code) {
         case 'auth/email-already-in-use':
-          if (method.indexOf('signup') !== -1) {
-            errorMessage = 'このメールアドレスは使用されています';
-          } else {
-            errorMessage = 'メールアドレスまたはパスワードが違います';
-          }
+          errorMessage = 'このメールアドレスは使用されています';
           break;
         case 'auth/user-not-found':
           errorMessage = 'メールアドレスが違います';
@@ -54,11 +56,7 @@ const store = new Vuex.Store({
           errorMessage = 'サービスの利用が停止されています';
           break;
         case 'auth/user-mismatch':
-          if (method === 'signin/popup') {
-            errorMessage = '認証されているユーザーと異なるアカウントが選択されました';
-          } else {
-            errorMessage = 'メールアドレスまたはパスワードが違います';
-          }
+          errorMessage = '認証されているユーザーと異なるアカウントが選択されました';
           break;
         default:
           errorMessage = '認証に失敗しました。しばらく時間をおいて再度お試しください';
@@ -77,10 +75,10 @@ const store = new Vuex.Store({
             firebase.auth().setPersistence(persistence);
             dispatch('clearError');
             dispatch('checkLogin');
-            router.push('/mypage');
+            router.push('/dashboard');
           })
-          .catch((error, method) => {
-            dispatch('checkErrorMessage', { error, method });
+          .catch((error) => {
+            dispatch('checkErrorMessage', error);
           });
       }
     },
@@ -91,8 +89,8 @@ const store = new Vuex.Store({
         .then(() => {
           dispatch('stateInit');
         })
-        .catch((error, method) => {
-          dispatch('checkErrorMessage', { error, method });
+        .catch((error) => {
+          dispatch('checkErrorMessage', error);
         });
     },
     signUp({ dispatch }, values) {
@@ -102,19 +100,22 @@ const store = new Vuex.Store({
           .createUserWithEmailAndPassword(values.email, values.password)
           .then(() => {
             // ユーザーアカウント作成成功時の処理
-            firebase
-              .auth()
-              .currentUser.updateProfile({
-                displayName: values.userName,
-              })
-              .then(() => {
-                dispatch('checkLogin');
-                router.push('/mypage');
-              });
+            firebase.auth().onAuthStateChanged((user) => {
+              if (user) {
+                const userData = db.collection('users').doc(user.uid);
+                userData.set({
+                  uid: user.uid,
+                  name: values.userName,
+                  wallet: 0,
+                });
+              }
+            });
+          })
+          .then(() => {
+            router.push('/dashboard');
           })
           .catch((error) => {
-            dispatch('checkErrorMessage', error.code);
-            return false;
+            dispatch('checkErrorMessage', error);
           });
       }
     },
