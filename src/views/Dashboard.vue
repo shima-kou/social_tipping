@@ -4,6 +4,9 @@
       <p class="userName">{{ user.name }}さんようこそ！</p>
       <p class="wallet">残高: {{ user.wallet }}円</p>
     </div>
+    <div class="buton-wrap">
+      <button @click="logout">ログアウトする</button>
+    </div>
   </div>
 </template>
 
