@@ -14,6 +14,7 @@ const store = new Vuex.Store({
       wallet: '',
       uid: '',
     },
+    users: {},
     errorMessage: '',
   },
   mutations: {
@@ -22,6 +23,9 @@ const store = new Vuex.Store({
     },
     getErrorMessage(state, errorMessage) {
       state.errorMessage = errorMessage;
+    },
+    getUsers(state, users) {
+      state.users = users;
     },
     clearErrorMessage(state) {
       state.errorMessage = '';
@@ -34,7 +38,6 @@ const store = new Vuex.Store({
         if (user) {
           const userData = db.collection('users').doc(user.uid);
           userData.get().then((doc) => {
-            console.log(doc.data());
             commit('getUser', doc.data());
           });
         }
@@ -130,10 +133,27 @@ const store = new Vuex.Store({
       };
       commit('getUser', user);
     },
+    usersData({ commit }) {
+      const usersArray = [];
+      const userData = db.collection('users');
+      userData
+        .get()
+        .then((users) => {
+          users.forEach((user) => {
+            usersArray.push(user.data());
+          });
+        })
+        .then(() => {
+          commit('getUsers', usersArray);
+        });
+    },
   },
   getters: {
     user: (state) => {
       return state.user;
+    },
+    users: (state) => {
+      return state.users;
     },
     errorMessage: (state) => {
       return state.errorMessage;
