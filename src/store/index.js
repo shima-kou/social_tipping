@@ -122,7 +122,7 @@ const store = new Vuex.Store({
           });
       }
     },
-    usersData({ commit }) {
+    usersData({ commit, dispatch }) {
       const userArray = [];
       firebase.auth().onAuthStateChanged((user) => {
         db.collection('users')
@@ -136,6 +136,9 @@ const store = new Vuex.Store({
           })
           .then(() => {
             commit('getUsers', userArray);
+          })
+          .catch((error) => {
+            dispatch('checkErrorMessage', error);
           });
       });
     },

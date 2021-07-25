@@ -19,20 +19,21 @@
               {{ userData.name }}
             </td>
             <td>
-              <button @click="walletToggle(index)">wallteを見る</button>
+              <button @click="modalToggle('walletShow', index)">wallteを見る</button>
             </td>
             <td>
-              <button @click="sendToggle(index)">送る</button>
+              <button @click="modalToggle('sendShow', index)">送る</button>
             </td>
           </tr>
         </tbody>
       </table>
+      <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
     </div>
     <div v-if="walletShow">
-      <walletModal @walletClose="walletToggle()" :users="users" :clickIndex="clickIndex" />
+      <walletModal @walletClose="modalToggle('walletShow', clickIndex)" :users="users" :clickIndex="clickIndex" />
     </div>
     <div v-if="sendShow">
-      <sendModal @sendClose="sendToggle()" :user="user" />
+      <sendModal @sendClose="modalToggle('sendShow', clickIndex)" :user="user" />
     </div>
   </div>
 </template>
@@ -66,23 +67,19 @@ export default {
         return store.getters.users;
       },
     },
+    errorMessage: {
+      get() {
+        return store.getters.errorMessage;
+      },
+    },
   },
   methods: {
     logout() {
       store.dispatch('logout');
     },
-    walletToggle(index) {
-      this.walletShow = !this.walletShow;
-      if (index !== undefined) {
-        this.clickIndex = index;
-      }
-    },
-    sendToggle(index) {
-      console.log(this.sendShow);
-      this.sendShow = !this.sendShow;
-      if (index !== undefined) {
-        this.clickIndex = index;
-      }
+    modalToggle(dataName, index) {
+      this.clickIndex = index;
+      this[dataName] = !this[dataName];
     },
   },
   components: {
