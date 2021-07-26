@@ -30,10 +30,14 @@
       <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
     </div>
     <div v-if="walletShow">
-      <walletModal @walletClose="modalToggle('walletShow', clickIndex)" :users="users" :clickIndex="clickIndex" />
+      <walletModal :users="users" :clickIndex="clickIndex" @walletClose="modalToggle('walletShow', clickIndex)" />
     </div>
     <div v-if="sendShow">
-      <sendModal @sendClose="modalToggle('sendShow', clickIndex)" :user="user" />
+      <sendModal :user="user" @sendClose="modalToggle('sendShow', clickIndex)" @sendWallet="sendWallet">
+        <template v-slot:body>
+          <p v-if="sendErrorMessage" class="error">{{ sendErrorMessage }}</p>
+        </template>
+      </sendModal>
     </div>
   </div>
 </template>
@@ -72,6 +76,14 @@ export default {
         return store.getters.errorMessage;
       },
     },
+    sendErrorMessage: {
+      get() {
+        return store.getters.sendErrorMessage;
+      },
+      set(value) {
+        store.commit('getSendErrorMessage', value);
+      },
+    },
   },
   methods: {
     logout() {
@@ -80,6 +92,16 @@ export default {
     modalToggle(dataName, index) {
       this.clickIndex = index;
       this[dataName] = !this[dataName];
+      if (this.sendShow === false && this.sendErrorMessage) {
+        this.sendErrorMessage = '';
+      }
+    },
+    sendWallet(value) {
+      const usersIndex = this.clickIndex;
+      store.dispatch('sendWallet', { usersIndex, value });
+      if (!this.sendErrorMessage) {
+        this.modalToggle('sendShow', this.clickIndex);
+      }
     },
   },
   components: {

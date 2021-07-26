@@ -4,22 +4,19 @@
       <div class="modal-wrapper">
         <div class="modal-container">
           <div class="modal-header">
-            <slot name="header">
-              {{ 'あなたの残高: ' + user.wallet }}
-            </slot>
+            {{ 'あなたの残高: ' + user.wallet }}
           </div>
 
           <div class="modal-body">
-            <slot name="body">
-              <p>送る金額</p>
-              <input type="text" v-model="sendWallet" />
-            </slot>
+            <p>送る金額</p>
+            <input type="text" v-model="sendWallet" />
+            <slot name="body"> </slot>
           </div>
 
           <div class="modal-footer">
             <slot name="footer">
               <div class="button-wrap">
-                <button class="modal-default-button">送信</button>
+                <button class="modal-default-button" @click="$emit('sendWallet', sendWallet)">送信</button>
               </div>
               <div class="button-wrap">
                 <button class="modal-default-button" @click="$emit('sendClose')">Close</button>
