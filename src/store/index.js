@@ -139,24 +139,24 @@ const store = new Vuex.Store({
           wallet: userWallet,
         };
       if (userWallet > 0 && !isNaN(userWallet)) {
-        commit('getUser', user);
-        usersDB
-          .doc(state.user.uid)
-          .update({
-            wallet: userWallet,
-          })
-          .then(() => {
-            usersDB
-              .doc(state.users[usersIndex].uid)
-              .update({
+        const self = usersDB.doc(state.user.uid),
+          sendUser = usersDB.doc(state.users[usersIndex].uid);
+        db.runTransaction((transaction) => {
+          return transaction
+            .get(sendUser)
+            .then(() => {
+              transaction.update(self, user);
+              transaction.update(sendUser, {
                 wallet: Number(state.users[usersIndex].wallet) + Number(value),
-              })
-              .then(() => {
-                dispatch('usersData');
-              })
-              .catch((error) => {
-                dispatch('checkErrorMessage', error);
               });
+            })
+            .catch((error) => {
+              dispatch('checkErrorMessage', error);
+            });
+        })
+          .then(() => {
+            commit('getUser', user);
+            dispatch('usersData');
           })
           .catch((error) => {
             dispatch('checkErrorMessage', error);
@@ -178,10 +178,8 @@ const store = new Vuex.Store({
                 userArray.push(doc.data());
               }
             });
-            console.log('success');
           })
           .then(() => {
-            console.log('uses');
             commit('getUsers', userArray);
           })
           .catch((error) => {
